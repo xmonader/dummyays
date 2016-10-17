@@ -1,0 +1,89 @@
+sshkey__demo:
+
+g8client__env1:
+    # url: 'du-conv-3.demo.greenitglobe.com'
+    url: 'gig.demo.greenitglobe.com'
+    login: 'thabeta'
+    password: 'password'
+    account: 'Azmy'
+
+vdcfarm__vdcfarm1:
+
+vdc__thabeta:
+    vdcfarm: vdcfarm1
+    g8client: 'env1'
+    # location: 'du-conv-3'
+    location: 'be-conv-2'
+
+node.ovc__thabeta:
+    os.image: 'g8os-test-1604'
+    # os.size: 2
+    bootdisk.size: 10
+    vdc: 'thabeta'
+    ports:
+     - '2200:22'
+     - '2201:2201'
+     - '2202:2202'
+     - '8000:8000'
+
+os.ssh.ubuntu__thabeta:
+    node: 'thabeta'
+
+vfs_config__opt:
+    mount.namespace: 'sandbox_ub1604'
+    mount.mountpoint: '/mnt/fs'
+    mount.flist: 'https://stor.jumpscale.org/stor2/flist/sandbox_ub1604/opt.flist'
+    mount.mode: 'ol'
+    mount.trimbase: false
+    backend.path: '/mnt/fs_backend/opt'
+    backend.namespace: 'sandbox_ub1604'
+    backend.cleanup.cron: "@every 1h"
+    backend.cleanup.old: 24
+    store.url: 'https://stor.jumpscale.org/stor2'
+
+fs.g8osfs__main:
+    os: 'thabeta'
+    vfs_config:
+        - opt
+
+node.docker__docker1:
+    image: 'jumpscale/ubuntu1604'
+    fs:
+      - 'main'
+    os: 'thabeta'
+    ports:
+     - '2201:22'
+     - '3306:3306'
+    volumes:
+      - '/mnt/fs/opt/:/opt/'
+
+os.ssh.ubuntu__docker1:
+  node: 'docker1'
+
+tidb__db1:
+    os: 'docker1'
+    clusterId: '1'
+
+
+node.docker__docker2:
+    image: 'jumpscale/ubuntu1604'
+    fs:
+      - 'main'
+    os: 'thabeta'
+    ports:
+     - '2202:22'
+     - '80:80'
+    volumes:
+      - '/mnt/fs/opt/:/opt/'
+
+os.ssh.ubuntu__docker2:
+  node: 'docker2'
+
+owncloud__own1:
+  os: 'docker2'
+  tidb: 'db1'
+  tidbuser: 'root'
+  tidbpassword: ''
+  sitename: 'fancycloud.com'
+  owncloudAdminUser: 'admin'
+  owncloudAdminPassword: 'admin'
